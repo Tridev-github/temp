@@ -1,0 +1,148 @@
+
+/gate/geometry/setMaterialDatabase    1hole/GateMaterials.db
+#=====================================================
+# GEOMETRY
+#=====================================================
+
+
+/gate/world/geometry/setXLength       800. mm
+/gate/world/geometry/setYLength       800. mm
+/gate/world/geometry/setZLength       800. mm
+
+# SPECT Head: main volume, everything is included in SPECThead
+# the name MUST be SPECThead
+/gate/world/daughters/name SPECThead
+/gate/world/daughters/insert box
+/gate/SPECThead/geometry/setXLength 80 cm
+/gate/SPECThead/geometry/setYLength 80 cm
+/gate/SPECThead/geometry/setZLength 80 cm
+/gate/SPECThead/vis/setColor white
+/gate/SPECThead/setMaterial Air
+/gate/SPECThead/vis/forceWireframe
+
+
+#collimator
+/gate/SPECThead/daughters/name barrier1
+/gate/SPECThead/daughters/insert box
+/gate/barrier1/geometry/setXLength  1 mm
+/gate/barrier1/geometry/setYLength  25 mm
+/gate/barrier1/geometry/setZLength  0.1 cm
+/gate/barrier1/placement/setTranslation  105.5 13 0 mm
+/gate/barrier1/setMaterial Tungsten
+/gate/barrier1/vis/setColor yellow
+
+/gate/SPECThead/daughters/name barrier2
+/gate/SPECThead/daughters/insert box
+/gate/barrier2/geometry/setXLength  1 mm
+/gate/barrier2/geometry/setYLength  25 mm
+/gate/barrier2/geometry/setZLength  0.1 cm
+/gate/barrier2/placement/setTranslation  105.5 -13 0 mm
+/gate/barrier2/setMaterial Tungsten
+/gate/barrier2/vis/setColor yellow
+
+
+# Shielding: crystal
+/gate/SPECThead/daughters/name crystal1
+/gate/SPECThead/daughters/insert box
+/gate/crystal1/geometry/setXLength 0.3 cm
+/gate/crystal1/geometry/setYLength 0.2 cm
+/gate/crystal1/geometry/setZLength  0.1 cm
+/gate/crystal1/placement/setTranslation  155.5 0 0 mm
+/gate/crystal1/setMaterial NaI
+/gate/crystal1/vis/setColor yellow
+
+/gate/crystal1/repeaters/insert                   ring
+/gate/crystal1/ring/setRepeatNumber                12
+/gate/barrier1/repeaters/insert                   ring
+/gate/barrier1/ring/setRepeatNumber                12
+/gate/barrier2/repeaters/insert                   ring
+/gate/barrier2/ring/setRepeatNumber                12
+#/gate/shielding/moves/insert         rotation
+#/gate/shielding/rotation/setSpeed    0.06 deg/s
+#/gate/shielding/rotation/setAxis     0 0 1
+/gate/systems/SPECThead/crystal/attach crystal1
+/gate/crystal1/attachCrystalSD
+
+#=====================================================
+# PHYSICS
+#=====================================================
+
+/gate/physics/addPhysicsList emstandard_opt3
+/gate/physics/processList Enabled
+/gate/physics/processList Initialized
+
+#=====================================================
+# INITIALISATION
+#=====================================================
+
+
+/gate/run/initialize
+
+#=====================================================
+# VISUALISATION
+#=====================================================
+
+/vis/open                     OGLIQt
+/vis/drawVolume
+/vis/viewer/flush
+/tracking/storeTrajectory     1
+/vis/scene/add/trajectories
+/vis/scene/endOfEventAction   accumulate
+#/vis/scene/add/axes            0 0 0 500 mm
+#/vis/scene/add/text            10 0 0 cm  20 0 0   X
+#/vis/scene/add/text            0 10 0 cm  20 0 0   Y
+#/vis/scene/add/text            0 0 10 cm  20 0 0   Z
+/vis/viewer/set/auxiliaryEdge  true
+/vis/reviewKeptEvents
+/vis/viewer/flush
+
+#=====================================================
+#   D I G I T I Z E R: DETECTOR ELECTRONIC RESPONSE
+#===================================================== 
+/gate/digitizerMgr/crystal1/SinglesDigitizer/Singles/insert adder
+#/gate/digitizerMgr/crystal2/SinglesDigitizer/Singles/insert adder
+#/gate/digitizerMgr/crystal3/SinglesDigitizer/Singles/insert adder
+#=====================================================
+#  P A R T I C L E   S O U R C E
+#=====================================================
+
+#/control/execute                          1hole/source.mac
+/gate/source/addSource mySource
+/gate/source/mySource/gps/particle gamma
+/gate/source/mySource/gps/type Plane
+/gate/source/mySource/gps/shape Square
+/gate/source/mySource/gps/energytype   Mono 
+/gate/source/mySource/gps/monoenergy   140.0 keV
+/gate/source/mySource/setActivity     500000 Bq
+/gate/source/mySource/gps/centre 0. 0. 0. mm
+/gate/source/mySource/gps/size 100 100 mm 
+/gate/source/mySource/gps/mintheta 90 deg  
+/gate/source/mySource/gps/maxtheta 90 deg   
+/gate/source/mySource/gps/minphi 0. deg 
+/gate/source/mySource/gps/maxphi 360. deg
+/gate/source/list
+
+#=====================================================
+#  D A T A   O U T P U T   
+#=====================================================
+
+/gate/output/root/enable
+/gate/output/root/setFileName             1hole/1hole
+#/gate/output/root/setRootHitFlag         1
+/gate/output/root/setRootSinglesFlag      1
+#/gate/output/root/setRootCoincidencesFlag 0
+#/gate/output/root/verbose 3
+
+
+
+#=====================================================
+#  R U N Parameters 
+#=====================================================
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto #123456789
+/gate/random/verbose 1
+
+/gate/application/setTimeSlice   100 s # 2s
+/gate/application/setTimeStart   0. s
+/gate/application/setTimeStop     100 s
+/gate/application/startDAQ

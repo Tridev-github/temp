@@ -1,0 +1,160 @@
+
+/gate/geometry/setMaterialDatabase    2hole/GateMaterials.db
+#=====================================================
+# GEOMETRY
+#=====================================================
+
+
+/gate/world/geometry/setXLength       800. mm
+/gate/world/geometry/setYLength       800. mm
+/gate/world/geometry/setZLength       800. mm
+
+# SPECT Head: main volume, everything is included in SPECThead
+# the name MUST be SPECThead
+/gate/world/daughters/name SPECThead
+/gate/world/daughters/insert box
+/gate/SPECThead/geometry/setXLength 80 cm
+/gate/SPECThead/geometry/setYLength 80 cm
+/gate/SPECThead/geometry/setZLength 80 cm
+/gate/SPECThead/vis/setColor white
+/gate/SPECThead/setMaterial Air
+/gate/SPECThead/vis/forceWireframe
+
+
+# Shielding: main volume
+/gate/SPECThead/daughters/name shielding
+/gate/SPECThead/daughters/insert box
+/gate/shielding/geometry/setXLength 80 cm
+/gate/shielding/geometry/setYLength 80 cm
+/gate/shielding/geometry/setZLength 80 cm
+/gate/shielding/placement/setTranslation 0. 0. 0. cm
+/gate/shielding/setMaterial Air
+
+
+# Shielding: first layer of the lead cover
+/gate/shielding/daughters/name shielding_lead_cover
+/gate/shielding/daughters/insert box
+/gate/shielding_lead_cover/geometry/setXLength 5.2 cm
+/gate/shielding_lead_cover/geometry/setYLength 10 cm
+/gate/shielding_lead_cover/geometry/setZLength 0.1 cm
+/gate/shielding_lead_cover/placement/setTranslation 131. 0. 0. mm
+/gate/shielding_lead_cover/setMaterial Air
+
+#collimator
+/gate/shielding_lead_cover/daughters/name barrier1
+/gate/shielding_lead_cover/daughters/insert box
+/gate/barrier1/geometry/setXLength  1 mm
+/gate/barrier1/geometry/setYLength  42 mm
+/gate/barrier1/geometry/setZLength  0.1 cm
+/gate/barrier1/placement/setTranslation  -25.5 29 0 mm
+/gate/barrier1/setMaterial Tungsten
+/gate/barrier1/vis/setColor yellow
+
+/gate/shielding_lead_cover/daughters/name barrier2
+/gate/shielding_lead_cover/daughters/insert box
+/gate/barrier2/geometry/setXLength  1 mm
+/gate/barrier2/geometry/setYLength  42 mm
+/gate/barrier2/geometry/setZLength  0.1 cm
+/gate/barrier2/placement/setTranslation  -25.5 -29 0 mm
+/gate/barrier2/setMaterial Tungsten
+/gate/barrier2/vis/setColor yellow
+
+/gate/shielding_lead_cover/daughters/name barrier3
+/gate/shielding_lead_cover/daughters/insert box
+/gate/barrier3/geometry/setXLength  1 mm
+/gate/barrier3/geometry/setYLength  14 mm
+/gate/barrier3/geometry/setZLength  0.1 cm
+/gate/barrier3/placement/setTranslation  -25.5 0 0 mm
+/gate/barrier3/setMaterial Tungsten
+/gate/barrier3/vis/setColor yellow
+
+
+# Shielding: crystal
+/gate/shielding_lead_cover/daughters/name crystal1
+/gate/shielding_lead_cover/daughters/insert box
+/gate/crystal1/geometry/setXLength 0.3 cm
+/gate/crystal1/geometry/setYLength 0.2 cm
+/gate/crystal1/geometry/setZLength  0.1 cm
+/gate/crystal1/placement/setTranslation  24.5 0 0 mm
+/gate/crystal1/setMaterial NaI
+/gate/crystal1/vis/setColor yellow
+
+#/gate/shielding_lead_cover/repeaters/insert                   ring
+#/gate/shielding_lead_cover/ring/setRepeatNumber                12
+/gate/shielding/moves/insert         rotation
+/gate/shielding/rotation/setSpeed    0.06 deg/s
+/gate/shielding/rotation/setAxis     0 0 1
+/gate/systems/SPECThead/crystal/attach crystal1
+/gate/crystal1/attachCrystalSD
+
+#=====================================================
+# PHYSICS
+#=====================================================
+
+/gate/physics/addPhysicsList emstandard_opt3
+/gate/physics/processList Enabled
+/gate/physics/processList Initialized
+
+#=====================================================
+# INITIALISATION
+#=====================================================
+
+
+/gate/run/initialize
+
+#=====================================================
+# VISUALISATION
+#=====================================================
+
+/vis/open                     OGLIQt
+/vis/drawVolume
+/vis/viewer/flush
+/tracking/storeTrajectory     1
+/vis/scene/add/trajectories
+/vis/scene/endOfEventAction   accumulate
+#/vis/scene/add/axes            0 0 0 500 mm
+#/vis/scene/add/text            10 0 0 cm  20 0 0   X
+#/vis/scene/add/text            0 10 0 cm  20 0 0   Y
+#/vis/scene/add/text            0 0 10 cm  20 0 0   Z
+/vis/viewer/set/auxiliaryEdge  true
+/vis/reviewKeptEvents
+/vis/viewer/flush
+
+#=====================================================
+#   D I G I T I Z E R: DETECTOR ELECTRONIC RESPONSE
+#===================================================== 
+/gate/digitizerMgr/crystal1/SinglesDigitizer/Singles/insert adder
+#/gate/digitizerMgr/crystal2/SinglesDigitizer/Singles/insert adder
+#/gate/digitizerMgr/crystal3/SinglesDigitizer/Singles/insert adder
+#=====================================================
+#  P A R T I C L E   S O U R C E
+#=====================================================
+
+/control/execute                          2hole/source.mac
+
+
+#=====================================================
+#  D A T A   O U T P U T   
+#=====================================================
+
+/gate/output/root/enable
+/gate/output/root/setFileName            2hole/2hole
+/gate/output/root/setRootHitFlag         1
+/gate/output/root/setRootSinglesFlag      1
+
+#/gate/output/root/setRootCoincidencesFlag 0
+#/gate/output/root/verbose 3
+
+
+
+#=====================================================
+#  R U N Parameters 
+#=====================================================
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto #123456789
+/gate/random/verbose 1
+
+/gate/application/setTimeSlice   100 s # 2s
+/gate/application/setTimeStart   0. s
+/gate/application/setTimeStop     6000 s
+/gate/application/startDAQ

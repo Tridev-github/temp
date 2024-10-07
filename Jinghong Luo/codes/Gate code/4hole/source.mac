@@ -1,0 +1,37 @@
+#/gate/source/addSource twogamma
+#/gate/source/twogamma/setActivity 
+#/gate/source/twogamma/setType backtoback
+#/gate/source/twogamma/gps/particle gamma
+#/gate/source/twogamma/gps/energytype Mono
+#/gate/source/twogamma/gps/monoenergy 0.511 MeV
+#/gate/source/twogamma/gps/type Point
+#/gate/source/twogamma/gps/angtype iso
+#/gate/source/twogamma/gps/mintheta 90 deg  
+#/gate/source/twogamma/gps/maxtheta 90 deg   
+#/gate/source/twogamma/gps/minphi 0. deg 
+#/gate/source/twogamma/gps/maxphi 180. deg
+#/gate/source/twogamma/gps/centre  0. 0. 0.0 cm
+#/gate/source/list
+# We create a new source with an arbitrary name ('singlegamma')
+#/gate/source/addSource singlegamma
+
+/gate/source/addSource source1
+/gate/source/source1/gps/particle gamma
+
+/gate/source/source1/gps/energytype   Mono 
+/gate/source/source1/gps/monoenergy   140.0 keV
+/gate/source/source1/setActivity     500000 Bq
+
+/gate/source/source1/gps/centre 0. 0. 0. mm
+/gate/source/source1/gps/type    Volume
+/gate/source/source1/gps/shape   Cylinder
+/gate/source/source1/gps/angtype iso
+/gate/source/source1/gps/radius  71. mm
+/gate/source/source1/gps/halfz   0.5 mm
+/gate/source/source1/gps/mintheta 90 deg  
+/gate/source/source1/gps/maxtheta 90 deg   
+/gate/source/source1/gps/minphi 0. deg 
+/gate/source/source1/gps/maxphi 360. deg
+#################
+
+/gate/source/list
